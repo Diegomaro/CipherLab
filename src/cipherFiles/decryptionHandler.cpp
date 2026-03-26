@@ -5,20 +5,35 @@ int probConsLength [10] = {100, 95, 84, 73, 62, 48, 37, 27, 14, 5};
 
 
 
-DecryptionHandler::DecryptionHandler(unsigned int alphabetLength, unsigned int startCharacter){
-    _alphabetLength = alphabetLength;
-    _startCharacter = startCharacter;
+DecryptionHandler::DecryptionHandler(){
     _length = 0;
     _attemptProbability = 0;
     _bestProbability = 0;
 }
 
+DecryptionHandler::~DecryptionHandler(){
+    if(_decipheredWord){
+        delete [] _decipheredWord;
+        _decipheredWord = nullptr;
+    }
+}
+
+bool DecryptionHandler::initializeHandler(unsigned int alphabetLength, unsigned int startCharacter){
+    if(alphabetLength <= 0){
+        return false;
+    }
+    _alphabetLength = alphabetLength;
+    _startCharacter = startCharacter;
+    return true;
+}
+
+
 bool DecryptionHandler::substitionDecipher(char* word, unsigned int length){
-    if(!word){
+    if(!word || _alphabetLength == 0){
         return false;
     }
     if(_decipheredWord){
-        delete _decipheredWord;
+        delete []_decipheredWord;
         _decipheredWord = nullptr;
     }
     _decipheredWord = new(std::nothrow) char[length];
@@ -30,19 +45,23 @@ bool DecryptionHandler::substitionDecipher(char* word, unsigned int length){
     for(int offset = 1; offset < _alphabetLength; offset++){
         char attemptedDecipher [_length];
         for(unsigned int i = 0; i < _length; i++){
-            char cipheredValue = word[i] + offset - _startCharacter;
-            cipheredValue %= _alphabetLength;
-            attemptedDecipher[i] = _startCharacter + cipheredValue;
+            if(word[i] == ' '){
+                attemptedDecipher[i] = word[i];
+            }else{
+                char cipheredValue = word[i] + offset - _startCharacter;
+                cipheredValue %= _alphabetLength;
+                attemptedDecipher[i] = _startCharacter + cipheredValue;
+            }
         }
         int tempProb = decypherProbability(attemptedDecipher);
-        if(tempProb > _attemptProbability || 1 == 1){
-        //if(tempProb > _attemptProbability){
+        //if(tempProb > _attemptProbability || 1 == 1){
+        if(tempProb > _attemptProbability){
         _attemptProbability = tempProb;
             _bestProbability = tempProb;
             for(int i = 0; i < _length; i++){
                 _decipheredWord[i] = attemptedDecipher[i];
             }
-            printWord();
+            //printWord();
         }    
     }
     return true;
@@ -134,14 +153,23 @@ int DecryptionHandler::decypherProbability(char* word){
     return probTotal;
 }
 
+bool DecryptionHandler::evaluateWord(char* word){
+    bool equal = true;
+    for(int i = 0; i < _length; i++){
+        if(word[i] != _decipheredWord[i]){
+            equal = false;
+        }
+    }
+    return equal;
+}
+
 bool DecryptionHandler::printWord(){
-    if(!_decipheredWord){
+    if(!_decipheredWord || _alphabetLength == 0){
         return false;
     }
     for(unsigned int i = 0; i < _length; i++){
         std::cout << _decipheredWord[i];
     }
-    std::cout << " : " << _bestProbability;
-    std::cout << std::endl;
+    std::cout << std::endl << "Probability of correctness: " << _bestProbability << "%" << std::endl;
     return true;
 }

@@ -1,4 +1,6 @@
 #pragma once
+#include <string>
+
 class Alphabet{
     public:
         Alphabet(unsigned int length);
@@ -10,6 +12,7 @@ class Alphabet{
         unsigned int getLength();
         bool generateWord(unsigned int length);
         char* getWord();
+        bool setWord(std::string word);
         unsigned int getWordLength();
         bool printWord();
 

@@ -1,3 +1,4 @@
 /src/extra/*.txt
 src/cipherFiles/main
 src/cipherFiles/*.txt
+*.csv

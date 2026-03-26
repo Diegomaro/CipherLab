@@ -3,7 +3,9 @@
 
 class EncryptionHandler{
     public:
-        EncryptionHandler(unsigned int alphabetLength, unsigned int startCharacter);
+        EncryptionHandler();
+        ~EncryptionHandler();
+        bool initializeHandler(unsigned int alphabetLength, unsigned int startCharacter);
         bool substitionCipher(char* word, unsigned int length, unsigned int offset);
         char* getWord();
         bool printWord();
