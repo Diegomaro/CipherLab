@@ -6,7 +6,6 @@
 
 #include "alphabet.hpp"
 #include "encrpytionHandler.hpp"
-#include "decryptionHandler.hpp"
 
 
 int main(){
@@ -14,16 +13,15 @@ int main(){
 
     Alphabet alphabet(26);
     EncryptionHandler eh;
-    DecryptionHandler dh;
+    //DecryptionHandler dh;
     char *word;
-    char *cypherWord;
 
     if(!alphabet.generateAlphabet()){
         std::cout << "Could not generate Alphabet!" << std::endl;
         return 1;
     }
     eh.initializeHandler(alphabet.getLength(), alphabet.getFirstElementAlphabet());
-    dh.initializeHandler(alphabet.getLength(), alphabet.getFirstElementAlphabet());
+    //dh.initializeHandler(alphabet.getLength(), alphabet.getFirstElementAlphabet());
 
     unsigned int answer = 0;
     while(answer != 11){
@@ -50,7 +48,7 @@ int main(){
                 word = alphabet.getWord();
             } break;
             case 2: {
-                int wordLength;
+                unsigned int wordLength;
                 std::cout << "Input word length desired: ";
                 std::cin >> wordLength;
                 if(!alphabet.generateWord(wordLength)){
@@ -67,12 +65,11 @@ int main(){
                     std::cout << "Could not cipher Word!" << std::endl;
                     return 1;
                 }
-                cypherWord = eh.getWord();
-                if(!dh.substitionDecipher(cypherWord, alphabet.getWordLength())){
+                if(!eh.substitionDecipher(alphabet.getWordLength())){
                     std::cout << "Could not decipher Word!" << std::endl;
                     return 1;
                 }
-                bool veridict = dh.evaluateWord(word);
+                bool veridict = eh.evaluateWord(word);
 
                 std::cout << "------------------------------" << std::endl;
                 std::cout << "SUBSTITION CIPHER TEST RESULTS" << std::endl;
@@ -86,16 +83,16 @@ int main(){
                 std::cout << std::endl;
                 std::cout << "Encrypted sentence" << std::endl;
                 std::cout << "------------------------------" << std::endl;
-                eh.printWord();
+                eh.printEncryptedWord();
                 std::cout << std::endl;
                 std::cout << "Decrypted sentence" << std::endl;
                 std::cout << "------------------------------" << std::endl;
-                dh.printWord();
+                eh.printUnencryptedWord();
                 std::cout << std::endl;
 
                 std::cout << "Verification " << std::endl;
                 std::cout << "------------------------------" << std::endl;
-                std::cout << "Decipher results:";
+                std::cout << "Decipher results: ";
                 if(veridict == true){
                     std::cout << "SUCESS!" << std::endl << std::endl;
                 } else{
@@ -106,8 +103,8 @@ int main(){
                 std::cin >> input;
             } break;
             case 4: {
-                int acurracyCounter = 0;
-                int total = 0;
+                unsigned int acurracyCounter = 0;
+                unsigned int total = 0;
                 std::ifstream file;
                 std::string line;
                 file.open("test_cases_substitution_cipher.csv");
@@ -125,18 +122,18 @@ int main(){
                         std::cout << "Could not cipher Word!" << std::endl;
                         return 1;
                     }
-                    if(!dh.substitionDecipher(eh.getWord(), alphabet.getWordLength())){
+                    if(!eh.substitionDecipher(alphabet.getWordLength())){
                         std::cout << "Could not decipher Word!" << std::endl;
                         return 1;
                     }
-                    bool veridict = dh.evaluateWord(word);
+                    bool veridict = eh.evaluateWord(word);
                     std::cout << "Offset: "<< cipherOffset << std::endl;
                     std::cout << "Original sentence:  ";
                     alphabet.printWord();
                     std::cout << "Encrypted sentence: ";
-                    eh.printWord();
+                    eh.printEncryptedWord();
                     std::cout << "Decrypted sentence: ";
-                    dh.printWord();
+                    eh.printUnencryptedWord();
                     if(veridict == true){
                         acurracyCounter++;
                         total ++;
@@ -147,7 +144,7 @@ int main(){
                     }
                 }
 
-                int probabilityOfSuccess = ((float)acurracyCounter/(float)total)*100;
+                unsigned int probabilityOfSuccess = ((float)acurracyCounter/(float)total)*100;
 
                 std::cout << "------------------------------------" << std::endl;
                 std::cout << "SUBSTITION CIPHER LARGE TEST RESULTS" << std::endl;
@@ -158,10 +155,10 @@ int main(){
                 std::cout << "------------------------------------" << std::endl;
                 std::cout << "Total succesfull tests" << std::endl;
                 std::cout << "Completed: " << acurracyCounter << std::endl << std::endl;
-                std::cout << "------------------------------" << std::endl;
+                std::cout << "------------------------------------" << std::endl;
                 std::cout << "Average success" << std::endl;
                 std::cout << "Probability of success: " << probabilityOfSuccess << "%" << std::endl << std::endl;            
-                std::cout << "------------------------------" << std::endl;
+                std::cout << "------------------------------------" << std::endl;
                 char input;
                 std::cout << "Input a character to continue...";
                 std::cin >> input;

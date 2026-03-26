@@ -68,8 +68,8 @@ bool Alphabet::generateWord(unsigned int length){
         return false;
     }
     _wordLength = length;
-    for(int i = 0; i < length; i++){
-        _word[i] = rand() % 26 + 97;
+    for(unsigned int i = 0; i < _wordLength; i++){
+        _word[i] = _alphabet[std::rand() % _alphaLength];
     }
     return true;
 }
@@ -86,14 +86,14 @@ bool Alphabet::setWord(std::string word){
     if (!word.empty() && word.back() == '\r') {
         word.pop_back();
     }
-    int newWordLength = word.length();
+    unsigned int newWordLength = word.length();
 
     _word = new(std::nothrow) char[newWordLength];
     if(!_word){
         return false;
     }
     _wordLength = newWordLength;
-    for(int i = 0; i < newWordLength; i++){
+    for(unsigned int i = 0; i < newWordLength; i++){
         _word[i] = word[i];
     }
     return true;
