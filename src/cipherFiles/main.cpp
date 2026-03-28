@@ -43,16 +43,18 @@ int main(){
                 std::cout << "Choosing Cipher" << std::endl;
                 std::cout << "--------------------------------------" << std::endl;
                 std::cout << "Select an option: " << std::endl << std::endl;
-                std::cout << "1. Caesar Cipher (default)" << std::endl;
+                std::cout << "1. Atbash Cipher" << std::endl;
                 std::cout << "2. Scytale Cipher" << std::endl;
-                std::cout << "3. Atbash Cipher" << std::endl;
+                std::cout << "3. Caesar Cipher (default)" << std::endl;
+                std::cout << "4. Vignere Cipher" << std::endl;
                 std::cout << std::endl << "Answer: ";
                 unsigned int cipherInt = 0;
                 std::cin >> cipherInt;
                 cipher = static_cast<Ciphers>(cipherInt);
-                if(cipher == Ciphers::caesar) cipherText = "Caesar Cipher";
+                if(cipher == Ciphers::atbash) cipherText = "Atbash Cipher";
                 else if(cipher == Ciphers::scytale) cipherText = "Scytale Cipher";
-                else if(cipher == Ciphers::atbash) cipherText = "Atbash Cipher";
+                else if(cipher == Ciphers::caesar) cipherText = "Caesar Cipher";
+                else if(cipher == Ciphers::vignere) cipherText = "Vignere Cipher";
             } break;
             case 2:{
                 std::cout << "--------------------------------------" << std::endl;
@@ -95,16 +97,16 @@ int main(){
 
                     //change depending on cipher, ADD LATER
                     switch(cipher){
-                        case Ciphers::caesar:{
-                            std::cout << "Input cipher offset desired: ";
-                            std::cin >> cipherOffset;
+                        case Ciphers::atbash:{
+                            std::cout << "No offset required!" << std::endl;
                         } break;
                         case Ciphers::scytale:{
                             std::cout << "Input cipher offset desired: ";
                             std::cin >> cipherOffset;
                         } break;
-                        case Ciphers::atbash:{
-                            std::cout << "No offset required!" << std::endl;
+                        case Ciphers::caesar:{
+                            std::cout << "Input cipher offset desired: ";
+                            std::cin >> cipherOffset;
                         } break;
                         default:{
                             std::cout << "Invalid cipher set!" << std::endl;
@@ -118,12 +120,12 @@ int main(){
                         return 1;
                     }
                     switch(cipher){
-                        case Ciphers::caesar:{
-                            if(!eh.caesarCipher(cipherOffset)){
+                        case Ciphers::atbash:{
+                            if(!eh.atbashCipher()){
                                 std::cout << "Could not cipher Word!" << std::endl;
                                 return 1;
                             }
-                            if(!eh.caesarDecipher()){
+                            if(!eh.atbashDecipher()){
                                 std::cout << "Could not decipher Word!" << std::endl;
                                 return 1;
                             }
@@ -138,19 +140,16 @@ int main(){
                                 return 1;
                             }
                         } break;
-                        case Ciphers::atbash:{
-                            if(!eh.atbashCipher()){
+                        case Ciphers::caesar:{
+                            if(!eh.caesarCipher(cipherOffset)){
                                 std::cout << "Could not cipher Word!" << std::endl;
                                 return 1;
                             }
-                            if(!eh.atbashDecipher()){
+                            if(!eh.caesarDecipher()){
                                 std::cout << "Could not decipher Word!" << std::endl;
                                 return 1;
                             }
                         } break;
-                    }
-                    if(cipher == Ciphers::caesar){
-                    } else if(cipher == Ciphers::scytale){
                     }
                     bool veridict = eh.evaluateWord(word);
 
@@ -202,16 +201,15 @@ int main(){
                             return 1;
                         }
                         switch(cipher){
-                            case Ciphers::caesar:{
-                                cipherOffset = (rand() % 25) + 1;
-                                if(!eh.caesarCipher(cipherOffset)){
+                            case Ciphers::atbash:{
+                                if(!eh.atbashCipher()){
                                     std::cout << "Could not cipher Word!" << std::endl;
                                     return 1;
                                 }
-                                if(!eh.caesarDecipher()){
+                                if(!eh.atbashDecipher()){
                                     std::cout << "Could not decipher Word!" << std::endl;
                                     return 1;
-                            }
+                                }
                             } break;
                             case Ciphers::scytale:{
                                 cipherOffset = (rand() % (((alphabet.getWordLength() + 1) / 2) - 1)) + 2;
@@ -224,15 +222,16 @@ int main(){
                                     return 1;
                                 }
                             } break;
-                            case Ciphers::atbash:{
-                                if(!eh.atbashCipher()){
+                            case Ciphers::caesar:{
+                                cipherOffset = (rand() % 25) + 1;
+                                if(!eh.caesarCipher(cipherOffset)){
                                     std::cout << "Could not cipher Word!" << std::endl;
                                     return 1;
                                 }
-                                if(!eh.atbashDecipher()){
+                                if(!eh.caesarDecipher()){
                                     std::cout << "Could not decipher Word!" << std::endl;
                                     return 1;
-                                }
+                            }
                             } break;
                             default:{
                                 std::cout << "Invalid cipher set!" << std::endl;

@@ -1,6 +1,7 @@
 #pragma once
 enum class Ciphers{
-    caesar = 1,
+    atbash = 1,
     scytale = 2,
-    atbash = 3
+    caesar = 3,
+    vignere = 4
 };
