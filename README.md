@@ -9,8 +9,8 @@ Lab for experimenting with different encryption algorithms and breaking them as 
 * Statistical Heuristics: Sequential consonants/vowels. Average probability of each sequence of consonants and vowels appearing in a word.
 
 **Project Structure:**
-Alphabet: Creates alphabet based on a given length and generates words
-EncryptionHandler: Manages encryption and decryption processes, as well as the language model predictions.
+* Alphabet: Creates alphabet based on a given length and generates words
+* EncryptionHandler: Manages encryption and decryption processes, as well as the language model predictions.
 
 **How to use:**
 1. Download src files.
