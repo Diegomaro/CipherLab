@@ -4,7 +4,7 @@ Lab for experimenting with different encryption algorithms and breaking them as 
 **Ciphers implemented so far:**
 * Caesar Cipher (100 BCE)
 * Scytale Cipher (400 BCE)
-
+* Atbash Cipher (600 BCE)
 **Language model used:**
 * Statistical Heuristics: Sequential consonants/vowels. Average probability of each sequence of consonants and vowels appearing in a word.
 

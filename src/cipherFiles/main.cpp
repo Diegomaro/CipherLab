@@ -19,8 +19,8 @@ int main(){
         return 1;
     }
     unsigned int cipherOffset = 0;
-    Ciphers cipher = Ciphers::substitution;
-    std::string cipherText  = "Substition cipher";
+    Ciphers cipher = Ciphers::caesar;
+    std::string cipherText  = "Caesar cipher";
 
     eh.initializeHandler(alphabet.getLength(), alphabet.getFirstElementAlphabet());
     unsigned int answer = 0;
@@ -42,21 +42,23 @@ int main(){
                 std::cout << "--------------------------------------" << std::endl;
                 std::cout << "Choosing Cipher" << std::endl;
                 std::cout << "--------------------------------------" << std::endl;
-                std::cout << "Select an option: " << std::endl << std::endl;            
-                std::cout << "1. Substitution Cipher (default)" << std::endl;
-                std::cout << "2. Scytale Cipher" << std::endl << std::endl;
+                std::cout << "Select an option: " << std::endl << std::endl;
+                std::cout << "1. Caesar Cipher (default)" << std::endl;
+                std::cout << "2. Scytale Cipher" << std::endl;
+                std::cout << "3. Atbash Cipher" << std::endl;
                 std::cout << std::endl << "Answer: ";
                 unsigned int cipherInt = 0;
                 std::cin >> cipherInt;
                 cipher = static_cast<Ciphers>(cipherInt);
-                if(cipher == Ciphers::substitution) cipherText = "Substition Cipher";
+                if(cipher == Ciphers::caesar) cipherText = "Caesar Cipher";
                 else if(cipher == Ciphers::scytale) cipherText = "Scytale Cipher";
+                else if(cipher == Ciphers::atbash) cipherText = "Atbash Cipher";
             } break;
             case 2:{
                 std::cout << "--------------------------------------" << std::endl;
                 std::cout << "Running Cipher" << std::endl;
                 std::cout << "--------------------------------------" << std::endl;
-                std::cout << "Select an option: " << std::endl << std::endl;            
+                std::cout << "Select an option: " << std::endl << std::endl;
                 std::cout << "1. Run one cipher" << std::endl;
                 std::cout << "2. Batch run of cipher" << std::endl;
                 std::cout << std::endl << "Answer: ";
@@ -66,18 +68,17 @@ int main(){
                     std::cout << "--------------------------------------" << std::endl;
                     std::cout << "Choosing sentence to process" << std::endl;
                     std::cout << "--------------------------------------" << std::endl;
-                    std::cout << "Select an option: " << std::endl << std::endl;            
+                    std::cout << "Select an option: " << std::endl << std::endl;
                     std::cout << "1. Set sentence by user" << std::endl;
-                    std::cout << "2. Generate a random word" << std::endl;
+                    std::cout << "2. Generate a random word (work in progress)" << std::endl;
                     std::cout << std::endl << "Answer: ";
                     unsigned int subAnswer = 0;
                     std::cin >> subAnswer;
                     if(subAnswer == 1){
-                        std::string word;
+                        std::string wordString;
                         std::cout << "Input sentence to cipher and decipher: ";
-                        //std::getline(std::cin >> std::ws, word);
-                        if(!alphabet.setWord("sparta is in danger")){
-                        //if(!alphabet.setWord(word)){
+                        std::getline(std::cin >> std::ws, wordString);
+                        if(!alphabet.setWord(wordString)){
                             std::cout << "Could not set Word!" << std::endl;
                             return 1;
                         }
@@ -91,27 +92,65 @@ int main(){
                         }
                     }
                     word = alphabet.getWord();
-                    //change depending on cipher FIX
-                    std::cout << "Input cipher offset desired: ";
-                    std::cin >> cipherOffset;
-                    if(cipher == Ciphers::substitution){
-                        if(!eh.substitionCipher(word, alphabet.getWordLength(), cipherOffset)){
-                            std::cout << "Could not cipher Word!" << std::endl;
+
+                    //change depending on cipher, ADD LATER
+                    switch(cipher){
+                        case Ciphers::caesar:{
+                            std::cout << "Input cipher offset desired: ";
+                            std::cin >> cipherOffset;
+                        } break;
+                        case Ciphers::scytale:{
+                            std::cout << "Input cipher offset desired: ";
+                            std::cin >> cipherOffset;
+                        } break;
+                        case Ciphers::atbash:{
+                            std::cout << "No offset required!" << std::endl;
+                        } break;
+                        default:{
+                            std::cout << "Invalid cipher set!" << std::endl;
                             return 1;
                         }
-                        if(!eh.substitionDecipher()){
-                            std::cout << "Could not decipher Word!" << std::endl;
-                            return 1;
-                        }
+                    }
+
+
+                    if(!eh.setRawWord(word, alphabet.getWordLength())){
+                        std::cout << "Could not set word to cipher!" << std::endl;
+                        return 1;
+                    }
+                    switch(cipher){
+                        case Ciphers::caesar:{
+                            if(!eh.caesarCipher(cipherOffset)){
+                                std::cout << "Could not cipher Word!" << std::endl;
+                                return 1;
+                            }
+                            if(!eh.caesarDecipher()){
+                                std::cout << "Could not decipher Word!" << std::endl;
+                                return 1;
+                            }
+                        } break;
+                        case Ciphers::scytale:{
+                            if(!eh.scytaleCipher(cipherOffset)){
+                                std::cout << "Could not cipher Word!" << std::endl;
+                                return 1;
+                            }
+                            if(!eh.scytaleDecipher()){
+                                std::cout << "Could not decipher Word!" << std::endl;
+                                return 1;
+                            }
+                        } break;
+                        case Ciphers::atbash:{
+                            if(!eh.atbashCipher()){
+                                std::cout << "Could not cipher Word!" << std::endl;
+                                return 1;
+                            }
+                            if(!eh.atbashDecipher()){
+                                std::cout << "Could not decipher Word!" << std::endl;
+                                return 1;
+                            }
+                        } break;
+                    }
+                    if(cipher == Ciphers::caesar){
                     } else if(cipher == Ciphers::scytale){
-                        if(!eh.scytaleCipher(word, alphabet.getWordLength(), cipherOffset)){
-                            std::cout << "Could not cipher Word!" << std::endl;
-                            return 1;
-                        }
-                        if(!eh.scytaleDecipher()){
-                            std::cout << "Could not decipher Word!" << std::endl;
-                            return 1;
-                        }
                     }
                     bool veridict = eh.evaluateWord(word);
 
@@ -121,7 +160,7 @@ int main(){
 
                     std::cout << "Word Length: " << alphabet.getWordLength();
                     std::cout << "  Offset: "<< cipherOffset << std::endl;
-                    
+
                     std::cout << "Original sentence" << std::endl;
                     alphabet.printWord();
                     std::cout << std::endl;
@@ -157,29 +196,49 @@ int main(){
                         if(!alphabet.setWord(line)){
                             return false;
                         }
-                        word = alphabet.getWord();                 
-                        if(cipher == Ciphers::substitution){
-                            cipherOffset = (rand() % 25) + 1;
-                            if(!eh.substitionCipher(word, alphabet.getWordLength(), cipherOffset)){
-                                std::cout << "Could not cipher Word!" << std::endl;
-                                return 1;
+                        word = alphabet.getWord();
+                        if(!eh.setRawWord(word, alphabet.getWordLength())){
+                            std::cout << "Could not set word to cipher!" << std::endl;
+                            return 1;
+                        }
+                        switch(cipher){
+                            case Ciphers::caesar:{
+                                cipherOffset = (rand() % 25) + 1;
+                                if(!eh.caesarCipher(cipherOffset)){
+                                    std::cout << "Could not cipher Word!" << std::endl;
+                                    return 1;
+                                }
+                                if(!eh.caesarDecipher()){
+                                    std::cout << "Could not decipher Word!" << std::endl;
+                                    return 1;
                             }
-                            if(!eh.substitionDecipher()){
-                                std::cout << "Could not decipher Word!" << std::endl;
-                                return 1;
-                            }
-                        } else if(cipher == Ciphers::scytale){
-                            cipherOffset = (rand() % (((alphabet.getWordLength() + 1) / 2) - 1)) + 2;
-                            if(!eh.scytaleCipher(word, alphabet.getWordLength(), cipherOffset)){
-                                std::cout << "Could not cipher Word!" << std::endl;
-                                return 1;
-                            }
-                            if(!eh.scytaleDecipher()){
-                                std::cout << "Could not decipher Word!" << std::endl;
+                            } break;
+                            case Ciphers::scytale:{
+                                cipherOffset = (rand() % (((alphabet.getWordLength() + 1) / 2) - 1)) + 2;
+                                if(!eh.scytaleCipher(cipherOffset)){
+                                    std::cout << "Could not cipher Word!" << std::endl;
+                                    return 1;
+                                }
+                                if(!eh.scytaleDecipher()){
+                                    std::cout << "Could not decipher Word!" << std::endl;
+                                    return 1;
+                                }
+                            } break;
+                            case Ciphers::atbash:{
+                                if(!eh.atbashCipher()){
+                                    std::cout << "Could not cipher Word!" << std::endl;
+                                    return 1;
+                                }
+                                if(!eh.atbashDecipher()){
+                                    std::cout << "Could not decipher Word!" << std::endl;
+                                    return 1;
+                                }
+                            } break;
+                            default:{
+                                std::cout << "Invalid cipher set!" << std::endl;
                                 return 1;
                             }
                         }
-                        
                         bool veridict = eh.evaluateWord(word);
                         total ++;
                         if(printMode == 1){
@@ -216,12 +275,12 @@ int main(){
                     std::cout << "Completed: " << acurracyCounter << std::endl << std::endl;
                     std::cout << "Average success" << std::endl;
                     std::cout << "-------------------------------" << std::endl;
-                    std::cout << "Probability of success: " << probabilityOfSuccess << "%" << std::endl << std::endl;            
+                    std::cout << "Probability of success: " << probabilityOfSuccess << "%" << std::endl << std::endl;
                     char input;
                     std::cout << "Input a character to continue...";
                     std::cin >> input;
                 }
-                // test file results and naming of the file
+                // test file results and naming of the file, ADD LATER
             } break;
             case 3:{
                 // Choose prediction model

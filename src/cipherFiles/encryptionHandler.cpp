@@ -3,6 +3,7 @@
 
 
 EncryptionHandler::EncryptionHandler(){
+    _rawWord = nullptr;
     _cipherWord = nullptr;
     _decipheredWord = nullptr;
     _wordLength = 0;
@@ -29,24 +30,49 @@ bool EncryptionHandler::initializeHandler(unsigned int alphabetLength, unsigned 
     return true;
 }
 
-bool EncryptionHandler::substitionCipher(char* word, unsigned int length, unsigned int offset){
+bool EncryptionHandler::setRawWord(char* word, unsigned int length){
     if(!word || _alphabetLength == 0){
+        return false;
+    }
+    if(_rawWord){
+        delete []_rawWord;
+        _rawWord = nullptr;
+    }
+    _rawWord = new(std::nothrow) char[length];
+    for(unsigned int i = 0; i < length; i++){
+        _rawWord[i] = word[i];
+    }
+    if(!_rawWord){
+        return false;
+    }
+    _wordLength = length;
+    return true;
+}
+
+bool EncryptionHandler::createWordToCipher(){
+    if(!_rawWord){
         return false;
     }
     if(_cipherWord){
         delete []_cipherWord;
         _cipherWord = nullptr;
     }
-    _cipherWord = new(std::nothrow) char[length];
+    _cipherWord = new(std::nothrow) char[_wordLength];
     if(!_cipherWord){
         return false;
     }
-    _wordLength = length; 
-    for(unsigned int i = 0; i < length; i++){
-        if(word[i] == ' '){
-            _cipherWord[i] = word[i];
+    return true;
+}
+
+bool EncryptionHandler::caesarCipher(unsigned int offset){
+    if(!createWordToCipher()){
+        return false;
+    }
+    for(unsigned int i = 0; i < _wordLength; i++){
+        if(_rawWord[i] == ' '){
+            _cipherWord[i] = _rawWord[i];
         }else{
-            char cipheredValue = word[i] + offset - _startCharacter;
+            char cipheredValue = _rawWord[i] + offset - _startCharacter;
             cipheredValue %= _alphabetLength;
             _cipherWord[i] = _startCharacter + cipheredValue;
         }
@@ -54,27 +80,16 @@ bool EncryptionHandler::substitionCipher(char* word, unsigned int length, unsign
     return true;
 }
 
-bool EncryptionHandler::scytaleCipher(char* word, unsigned int length, unsigned int offset){
-    if(!word || _alphabetLength == 0){
+bool EncryptionHandler::scytaleCipher(unsigned int offset){
+    if(!createWordToCipher()){
         return false;
     }
-    if(_cipherWord){
-        delete []_cipherWord;
-        _cipherWord = nullptr;
-    }
-    _cipherWord = new(std::nothrow) char[length];
-    if(!_cipherWord){
-        return false;
-    }
-    _wordLength = length;
-
     unsigned int posCounter = 0;
     unsigned int indexCounter = 0;
-
     for(unsigned int i = 0; i < offset; i++){
         indexCounter = i;
         while(indexCounter < _wordLength){
-            _cipherWord[posCounter] =  word[indexCounter];
+            _cipherWord[posCounter] =  _rawWord[indexCounter];
             indexCounter += offset;
             posCounter++;
         }
@@ -82,9 +97,22 @@ bool EncryptionHandler::scytaleCipher(char* word, unsigned int length, unsigned 
     return true;
 }
 
+bool EncryptionHandler::atbashCipher(){
+    if(!createWordToCipher()){
+        return false;
+    }
+    for(unsigned int i = 0; i < _wordLength; i++){
+        if(_rawWord[i] == ' '){
+            _cipherWord[i] = _rawWord[i];
+        } else{
+            _cipherWord[i] = 2 * _startCharacter + (_alphabetLength - 1) - _rawWord[i];
+        }
+    }
+    return true;
+}
 
-bool EncryptionHandler::substitionDecipher(){
-    if(!_cipherWord || _alphabetLength == 0){
+bool EncryptionHandler::createWordToDecipher(){
+    if(!_cipherWord){
         return false;
     }
     if(_decipheredWord){
@@ -93,6 +121,13 @@ bool EncryptionHandler::substitionDecipher(){
     }
     _decipheredWord = new(std::nothrow) char[_wordLength];
     if(!_decipheredWord){
+        return false;
+    }
+    return true;
+}
+
+bool EncryptionHandler::caesarDecipher(){
+    if(!createWordToDecipher()){
         return false;
     }
     _attemptProbability = 0;
@@ -116,7 +151,7 @@ bool EncryptionHandler::substitionDecipher(){
             for(unsigned int i = 0; i < _wordLength; i++){
                 _decipheredWord[i] = decipherAttempt[i];
             }
-        }    
+        }
     }
     if(decipherAttempt){
         delete []decipherAttempt;
@@ -126,26 +161,16 @@ bool EncryptionHandler::substitionDecipher(){
 }
 
 bool EncryptionHandler::scytaleDecipher(){
-    if(!_cipherWord || _alphabetLength == 0){
+    if(!createWordToDecipher()){
         return false;
     }
-    if(_decipheredWord){
-        delete []_decipheredWord;
-        _decipheredWord = nullptr;
-    }
-    _decipheredWord = new(std::nothrow) char[_wordLength];
-    if(!_decipheredWord){
-        return false;
-    }
-    
     _attemptProbability = 0;
     char *decipherAttempt = new(std::nothrow) char[_wordLength];
     if(!decipherAttempt){
         return false;
     }
     unsigned int maxOffset = (_wordLength + 1) / 2;
-    //unsigned int maxOffset = _wordLength;
-    
+
     for(unsigned int offset = 1; offset < maxOffset; offset++){
         unsigned int posCounter = 0;
         unsigned int indexCounter = 0;
@@ -167,7 +192,7 @@ bool EncryptionHandler::scytaleDecipher(){
                 indexCounter += tmpOffset;
                 posCounter++;
             }
-        }    
+        }
 
         unsigned int tempProb = decypherProbability(decipherAttempt);
         if(tempProb > _attemptProbability || 1 == 1){
@@ -176,11 +201,25 @@ bool EncryptionHandler::scytaleDecipher(){
                 _decipheredWord[i] = decipherAttempt[i];
             }
             printUnencryptedWord();
-        }  
+        }
     }
     if(decipherAttempt){
         delete []decipherAttempt;
         decipherAttempt = nullptr;
+    }
+    return true;
+}
+
+bool EncryptionHandler::atbashDecipher(){
+    if(!createWordToDecipher()){
+        return false;
+    }
+    for(unsigned int i = 0; i < _wordLength; i++){
+        if(_cipherWord[i] == ' '){
+            _decipheredWord[i] = _cipherWord[i];
+        } else{
+        _decipheredWord[i] = 2 * _startCharacter + (_alphabetLength - 1) - _cipherWord[i];
+        }
     }
     return true;
 }
@@ -238,7 +277,7 @@ unsigned int EncryptionHandler::decypherProbability(char* word){
         ctrChar = 0;
         state = 0;
     }
-    
+
     unsigned int probVow = 0;
     unsigned int probVowCount = 0;
     for(unsigned int i = 0; i < 6; i++){
