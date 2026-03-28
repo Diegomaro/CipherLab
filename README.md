@@ -2,7 +2,7 @@
 Lab for experimenting with different encryption algorithms and breaking them as well as finding which is the correct decipher with a custom language model. (Will add better models as new encryptions require better ones)
 
 **Ciphers implemented so far:**
-* Substitution Cipher (600 BCE)
+* Caesar Cipher (100 BCE)
 * Scytale Cipher (400 BCE)
 
 **Language model used:**
