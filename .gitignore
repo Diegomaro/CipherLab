@@ -2,3 +2,4 @@
 src/cipherFiles/main
 src/cipherFiles/*.txt
 *.csv
+*.txt

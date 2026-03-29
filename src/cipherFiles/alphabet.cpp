@@ -5,6 +5,7 @@
 
 Alphabet::Alphabet(unsigned int length) {
     _alphabet = nullptr;
+    _word = nullptr;
     _alphaLength = length;
     _wordLength = 0;
 }
@@ -18,16 +19,14 @@ unsigned int Alphabet::getLength(){
 }
 
 bool Alphabet::destroyAlphabet(){
-    if(!_alphabet){
-        return false;  
+    if(_alphabet){
+        delete [] _alphabet;
+        _alphabet = nullptr;
     }
-    delete [] _alphabet;
-    _alphabet = nullptr;
-    if(!_word){
-        return false;  
+    if(_word){
+        delete [] _word;
+        _word = nullptr;
     }
-    delete [] _word;
-    _word = nullptr;
     return true;
 }
 

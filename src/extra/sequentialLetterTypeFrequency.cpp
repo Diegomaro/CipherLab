@@ -5,7 +5,7 @@
 int main(){
     std::ifstream file;
     std::string line;
-    file.open("words_alpha.txt");
+    file.open("dictionary.txt");
     if(!file.is_open()){
         return 1;
     }

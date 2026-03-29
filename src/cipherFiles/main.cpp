@@ -62,7 +62,8 @@ int main(){
                 std::cout << "--------------------------------------" << std::endl;
                 std::cout << "Select an option: " << std::endl << std::endl;
                 std::cout << "1. Run one cipher" << std::endl;
-                std::cout << "2. Batch run of cipher" << std::endl;
+                std::cout << "2. Run one large set cipher" << std::endl;
+                std::cout << "3. Batch run of cipher" << std::endl;
                 std::cout << std::endl << "Answer: ";
                 unsigned int mode = 0;
                 std::cin >> mode;
@@ -145,7 +146,7 @@ int main(){
                                 std::cout << "Could not cipher Word!" << std::endl;
                                 return 1;
                             }
-                            if(!eh.caesarDecipher()){
+                            if(!eh.caesarDecipherImproved()){
                                 std::cout << "Could not decipher Word!" << std::endl;
                                 return 1;
                             }
@@ -178,7 +179,90 @@ int main(){
                     char input;
                     std::cout << "Input a character to continue...";
                     std::cin >> input;
-                } else if( mode == 2) {
+
+                } else if(mode == 2){
+                    std::ifstream file;
+                    std::string line;
+                    file.open("../data/largeTest.txt");
+                    if(!file.is_open()){
+                        std::cout << "Could not open file!" << std::endl;
+                        return 1;
+                    }
+                    while(std::getline(file, line)){
+                        if(!alphabet.setWord(line)){
+                            return 1;
+                        }
+                        word = alphabet.getWord();
+                        if(!eh.setRawWord(word, alphabet.getWordLength())){
+                            std::cout << "Could not set word to cipher!" << std::endl;
+                            return 1;
+                        }
+                        switch(cipher){
+                            case Ciphers::atbash:{
+                                if(!eh.atbashCipher()){
+                                    std::cout << "Could not cipher Word!" << std::endl;
+                                    return 1;
+                                }
+                                if(!eh.atbashDecipher()){
+                                    std::cout << "Could not decipher Word!" << std::endl;
+                                    return 1;
+                                }
+                            } break;
+                            case Ciphers::scytale:{
+                                cipherOffset = (rand() % (((alphabet.getWordLength() + 1) / 2) - 1)) + 2;
+                                if(!eh.scytaleCipher(cipherOffset)){
+                                    std::cout << "Could not cipher Word!" << std::endl;
+                                    return 1;
+                                }
+                                if(!eh.scytaleDecipher()){
+                                    std::cout << "Could not decipher Word!" << std::endl;
+                                    return 1;
+                                }
+                            } break;
+                            case Ciphers::caesar:{
+                                cipherOffset = (rand() % 25) + 1;
+                                if(!eh.caesarCipher(cipherOffset)){
+                                    std::cout << "Could not cipher Word!" << std::endl;
+                                    return 1;
+                                }
+                                if(!eh.caesarDecipherImproved()){
+                                    std::cout << "Could not decipher Word!" << std::endl;
+                                    return 1;
+                            }
+                            } break;
+                            default:{
+                                std::cout << "Invalid cipher set!" << std::endl;
+                                return 1;
+                            }
+                        }
+                        bool veridict = eh.evaluateWord(word);
+                        std::cout << "------------------------------" << std::endl;
+                        std::cout << cipherText << " Test Results" << std::endl;
+                        std::cout << "------------------------------" << std::endl << std::endl;
+
+                        std::cout << "Word Length: " << alphabet.getWordLength();
+                        std::cout << "  Offset: "<< cipherOffset << std::endl;
+
+                        std::cout << "Original sentence" << std::endl;
+                        alphabet.printWord();
+                        std::cout << std::endl;
+                        std::cout << "Encrypted sentence" << std::endl;
+                        eh.printEncryptedWord();
+                        std::cout << std::endl;
+                        std::cout << "Decrypted sentence" << std::endl;
+                        eh.printUnencryptedWord();
+                        std::cout << std::endl;
+                        std::cout << "Decipher results: ";
+                        if(veridict == true){
+                            std::cout << "Success!" << std::endl << std::endl;
+                        } else{
+                            std::cout << "Failure!" << std::endl << std::endl;
+                        }
+                        char input;
+                        std::cout << "Input a character to continue...";
+                        std::cin >> input;
+                    }
+                } else if(mode == 3){
                     unsigned int printMode = 0;
                     std::cout << "Insert '1' to print each test case, insert any other number to not print each test case: ";
                     std::cin >> printMode;
@@ -186,7 +270,7 @@ int main(){
                     unsigned int total = 0;
                     std::ifstream file;
                     std::string line;
-                    file.open("test_cases_substitution_cipher.csv");
+                    file.open("../data/test_cases_substitution_cipher.csv");
                     if(!file.is_open()){
                         std::cout << "Could not open file!" << std::endl;
                         return 1;
@@ -228,7 +312,7 @@ int main(){
                                     std::cout << "Could not cipher Word!" << std::endl;
                                     return 1;
                                 }
-                                if(!eh.caesarDecipher()){
+                                if(!eh.caesarDecipherImproved()){
                                     std::cout << "Could not decipher Word!" << std::endl;
                                     return 1;
                             }

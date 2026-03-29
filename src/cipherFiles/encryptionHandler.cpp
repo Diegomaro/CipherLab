@@ -11,6 +11,10 @@ EncryptionHandler::EncryptionHandler(){
 }
 
 EncryptionHandler::~EncryptionHandler(){
+    if(_rawWord){
+        delete [] _rawWord;
+        _rawWord = nullptr;
+    }
     if(_cipherWord){
         delete [] _cipherWord;
         _cipherWord = nullptr;
@@ -145,7 +149,7 @@ bool EncryptionHandler::caesarDecipher(){
                 decipherAttempt[i] = _startCharacter + cipheredValue;
             }
         }
-        unsigned int tempProb = decypherProbability(decipherAttempt);
+        unsigned int tempProb = decypherProbabilityModel(decipherAttempt);
         if(tempProb > _attemptProbability){
             _attemptProbability = tempProb;
             for(unsigned int i = 0; i < _wordLength; i++){
@@ -156,6 +160,24 @@ bool EncryptionHandler::caesarDecipher(){
     if(decipherAttempt){
         delete []decipherAttempt;
         decipherAttempt = nullptr;
+    }
+    return true;
+}
+
+
+bool EncryptionHandler::caesarDecipherImproved(){
+    if(!createWordToDecipher()){
+        return false;
+    }
+    unsigned int offset = shiftedDecipherModel();
+    for(unsigned int i = 0; i < _wordLength; i++){
+        if(_cipherWord[i] == ' '){
+            _decipheredWord[i] = _cipherWord[i];
+        }else{
+            char cipheredValue = _cipherWord[i] + (_alphabetLength - offset) - _startCharacter;
+            cipheredValue %= _alphabetLength;
+            _decipheredWord[i] = _startCharacter + cipheredValue;
+        }
     }
     return true;
 }
@@ -194,7 +216,7 @@ bool EncryptionHandler::scytaleDecipher(){
             }
         }
 
-        unsigned int tempProb = decypherProbability(decipherAttempt);
+        unsigned int tempProb = decypherProbabilityModel(decipherAttempt);
         if(tempProb > _attemptProbability || 1 == 1){
             _attemptProbability = tempProb;
             for(unsigned int i = 0; i < _wordLength; i++){
@@ -224,7 +246,7 @@ bool EncryptionHandler::atbashDecipher(){
     return true;
 }
 
-unsigned int EncryptionHandler::decypherProbability(char* word){
+unsigned int EncryptionHandler::decypherProbabilityModel(char* word){
     unsigned int vowelLength [6] = {0, 0, 0, 0, 0, 0};
     unsigned int consonantLength [10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     unsigned int ctrChar = 0;
@@ -283,7 +305,7 @@ unsigned int EncryptionHandler::decypherProbability(char* word){
     for(unsigned int i = 0; i < 6; i++){
         if(vowelLength[i] != 0){
             probVowCount += vowelLength[i];
-            probVow += vowelLength[i] * probVowLength[i];
+            probVow += vowelLength[i] * probVowLengthModel[i];
 
         }
     }
@@ -297,7 +319,7 @@ unsigned int EncryptionHandler::decypherProbability(char* word){
     for(unsigned int i = 0; i < 10; i++){
         if(consonantLength[i] != 0){
             probConsCount += consonantLength[i];
-            probCons += consonantLength[i] * probConsLength[i];
+            probCons += consonantLength[i] * probConsLengthModel[i];
         }
     }
     if(probConsCount != 0){
@@ -308,6 +330,53 @@ unsigned int EncryptionHandler::decypherProbability(char* word){
     unsigned int probTotal = (probVow + probCons) / 2;
     return probTotal;
 }
+
+unsigned int EncryptionHandler::shiftedDecipherModel(){
+    unsigned int letterFrequency [26] =
+    {
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    };
+    unsigned int totalLetters = 0;
+    for(int i = 0; i < _wordLength; i++){
+        if(122 >= (int)_cipherWord[i] && (int)_cipherWord[i] >= 97){
+            letterFrequency[(int)_cipherWord[i] - 97]++;
+            totalLetters ++;
+        } else if(90 >= (int)_cipherWord[i] && (int)_cipherWord[i] >= 65){
+            letterFrequency[(int)_cipherWord[i] + 32 - 97]++;
+            totalLetters ++;
+        }
+    }
+    for(int i = 0; i < 26; i++){
+        letterFrequency[i] =  (int) ((float)letterFrequency[i] * 1000) / (float)totalLetters;
+    }
+    unsigned int totalFrequency = 0;
+    for(int i = 0; i < 26; i++){
+        totalFrequency += letterFrequency[i];
+    }
+    int averageDifference = 0;
+    int averageDifferenceMin = 10000000;
+    int finalOffset = 0;
+    for(int i = 0; i < 26; i++){
+        averageDifference = 0;
+        for(int j = 0; j < 26; j++){
+            if(letterFrequency[j] > 25){
+                int transformedPos = (j + i) % 26;
+                if(letterFrequency[transformedPos] > letterFrequencyModel[j]){
+                    averageDifference += letterFrequency[transformedPos] - letterFrequencyModel[j];
+                } else{
+                    averageDifference += letterFrequencyModel[j] - letterFrequency[transformedPos];
+                }
+            }
+        }
+        if(averageDifference < averageDifferenceMin){
+            finalOffset = i;
+            averageDifferenceMin = averageDifference;
+        }
+    }
+    return finalOffset;
+}
+
 
 bool EncryptionHandler::evaluateWord(char* word){
     bool equal = true;
