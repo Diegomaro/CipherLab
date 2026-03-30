@@ -1,11 +1,12 @@
 #include <math.h>
-#include "encrpytionHandler.hpp"
+#include "encryptionHandler.hpp"
 
 
 EncryptionHandler::EncryptionHandler(){
     _rawWord = nullptr;
     _cipherWord = nullptr;
     _decipheredWord = nullptr;
+    _decipherAttempt = nullptr;
     _wordLength = 0;
     _attemptProbability = 0;
 }
@@ -77,7 +78,7 @@ bool EncryptionHandler::atbashCipher(){
         return false;
     }
     for(unsigned int i = 0; i < _wordLength; i++){
-        if(_rawWord[i] == ' '){
+        if(_rawWord[i] < 97 || _rawWord[i] > 122){
             _cipherWord[i] = _rawWord[i];
         } else{
             _cipherWord[i] = 2 * _startCharacter + (_alphabetLength - 1) - _rawWord[i];
@@ -147,7 +148,7 @@ bool EncryptionHandler::atbashDecipher(){
         return false;
     }
     for(unsigned int i = 0; i < _wordLength; i++){
-        if(_cipherWord[i] == ' '){
+        if(_cipherWord[i] < 97 || _cipherWord[i] > 122){
             _decipheredWord[i] = _cipherWord[i];
         } else{
         _decipheredWord[i] = 2 * _startCharacter + (_alphabetLength - 1) - _cipherWord[i];
@@ -156,56 +157,47 @@ bool EncryptionHandler::atbashDecipher(){
     return true;
 }
 
-
 bool EncryptionHandler::scytaleDecipher(unsigned int model){
     if(!createWordToDecipher()){
         return false;
     }
     _attemptProbability = 0;
-    char *decipherAttempt = new(std::nothrow) char[_wordLength];
-    if(!decipherAttempt){
-        return false;
-    }
-    unsigned int maxOffset = (_wordLength + 1) / 2;
-
-    for(unsigned int offset = 1; offset < maxOffset; offset++){
+    unsigned int maxOffset = _wordLength;
+    for(unsigned int columns = 1; columns < maxOffset; columns++){
+        unsigned int rows = (_wordLength + columns - 1) / columns;
+        unsigned int module = _wordLength % columns;
+        if(module == 0){
+            module = columns;
+        }
+        unsigned int jump = rows;
         unsigned int posCounter = 0;
-        unsigned int indexCounter = 0;
-        unsigned int charsPerJump = (int) ceil((float)_wordLength / (float)offset);
-        unsigned int maxWordLength = charsPerJump * offset;
-        for(unsigned int j = 0; j < offset; j++){
-            unsigned int missing = maxWordLength - _wordLength;
-            missing = charsPerJump - missing;
-            unsigned int tmpOffset = offset;
-            indexCounter = j;
-            while(indexCounter < _wordLength){
-                tmpOffset = offset;
-                if(missing > 0){
-                    missing--;
-                } else{
-                    tmpOffset--;
+        for(unsigned int ctr = 0; ctr < rows; ctr ++){
+            unsigned int indexCounter = ctr;
+            unsigned int jumpCur = jump;
+            unsigned modCur = module;
+            while(indexCounter < _wordLength && posCounter < _wordLength){
+                _decipherAttempt[posCounter] = _cipherWord[indexCounter];
+                posCounter ++;
+                indexCounter += jumpCur;
+                if(modCur > 0){
+                    modCur --;
+                    if(modCur == 0 && jumpCur != 1){
+                        jumpCur = rows - 1;
+                    }
                 }
-                decipherAttempt[posCounter] =  _cipherWord[indexCounter];
-                indexCounter += tmpOffset;
-                posCounter++;
             }
         }
-
         unsigned int tempProb = modelHandler(model);
-        if(tempProb > _attemptProbability || 1 == 1){
+        if(tempProb > _attemptProbability){
             _attemptProbability = tempProb;
             for(unsigned int i = 0; i < _wordLength; i++){
                 _decipheredWord[i] = _decipherAttempt[i];
             }
-            printUnencryptedWord();
         }
-    }
-    if(_decipherAttempt){
-        delete []_decipherAttempt;
-        _decipherAttempt = nullptr;
     }
     return true;
 }
+
 
 bool EncryptionHandler::caesarDecipher(unsigned int model){
     if(!createWordToDecipher()){
@@ -353,7 +345,6 @@ unsigned int EncryptionHandler::letterFrequencyProbabilityModel(){
     return averageProbability;
 }
 
-
 bool EncryptionHandler::evaluateWord(char* word){
     for(unsigned int i = 0; i < _wordLength; i++){
         if(word[i] != _decipheredWord[i]){
@@ -371,8 +362,19 @@ char* EncryptionHandler::getUnencryptedWord(){
     return _decipheredWord;
 }
 
+bool EncryptionHandler::printRawWord(){
+    if(!_rawWord){
+        return false;
+    }
+    for(unsigned int i = 0; i < _wordLength; i++){
+        std::cout << _rawWord[i];
+    }
+    std::cout << std::endl;
+    return true;
+}
+
 bool EncryptionHandler::printEncryptedWord(){
-    if(!_cipherWord || _alphabetLength == 0){
+    if(!_cipherWord){
         return false;
     }
     for(unsigned int i = 0; i < _wordLength; i++){
@@ -383,7 +385,7 @@ bool EncryptionHandler::printEncryptedWord(){
 }
 
 bool EncryptionHandler::printUnencryptedWord(){
-    if(!_decipheredWord || _alphabetLength == 0){
+    if(!_decipheredWord){
         return false;
     }
     for(unsigned int i = 0; i < _wordLength; i++){

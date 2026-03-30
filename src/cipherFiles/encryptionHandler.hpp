@@ -22,6 +22,7 @@ class EncryptionHandler{
 
         char* getEncryptedWord();
         char* getUnencryptedWord();
+        bool printRawWord();
         bool printEncryptedWord();
         bool printUnencryptedWord();
     private:
