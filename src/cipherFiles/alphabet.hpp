@@ -3,8 +3,9 @@
 
 class Alphabet{
     public:
-        Alphabet(unsigned int length);
+        Alphabet();
         ~Alphabet();
+        void setAlphabetLength(unsigned int alphabetLength);
         bool generateAlphabet();
         bool destroyAlphabet();
         char* getAlphabet();
@@ -17,7 +18,7 @@ class Alphabet{
         bool printWord();
 
     private:
-        unsigned int _alphaLength;
+        unsigned int _alphabetLength;
         char *_alphabet;
         char *_word;
         unsigned int _wordLength;

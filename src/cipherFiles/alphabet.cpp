@@ -3,10 +3,10 @@
 #include <random>
 #include <ctime>
 
-Alphabet::Alphabet(unsigned int length) {
+Alphabet::Alphabet() {
     _alphabet = nullptr;
     _word = nullptr;
-    _alphaLength = length;
+    _alphabetLength = 0;
     _wordLength = 0;
 }
 
@@ -14,8 +14,12 @@ Alphabet::~Alphabet() {
     destroyAlphabet();
 }
 
+void Alphabet::setAlphabetLength(unsigned int alphabetLength){
+    _alphabetLength = alphabetLength;
+}
+
 unsigned int Alphabet::getLength(){
-    return _alphaLength;
+    return _alphabetLength;
 }
 
 bool Alphabet::destroyAlphabet(){
@@ -31,11 +35,18 @@ bool Alphabet::destroyAlphabet(){
 }
 
 bool Alphabet::generateAlphabet(){
-    if(_alphabet){
+    if(_alphabetLength == 0){
         return false;
     }
-    _alphabet = new(std::nothrow) char[_alphaLength];
-    for(unsigned int i = 0; i < _alphaLength; i++){
+    if(_alphabet){
+        delete [] _alphabet;
+        _alphabet = nullptr;
+    }
+    _alphabet = new(std::nothrow) char[_alphabetLength];
+    if(!_alphabet){
+        return false;
+    }
+    for(unsigned int i = 0; i < _alphabetLength; i++){
         _alphabet[i] = 97 + i;
     }
     return true;
@@ -68,7 +79,7 @@ bool Alphabet::generateWord(unsigned int length){
     }
     _wordLength = length;
     for(unsigned int i = 0; i < _wordLength; i++){
-        _word[i] = _alphabet[std::rand() % _alphaLength];
+        _word[i] = _alphabet[std::rand() % _alphabetLength];
     }
     return true;
 }
