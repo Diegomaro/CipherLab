@@ -21,6 +21,8 @@ int main(){
     unsigned int cipherOffset = 0;
     Ciphers cipher = Ciphers::caesar;
     std::string cipherText  = "Caesar cipher";
+    unsigned int model = 1;
+    std::string modelText = "Model 1. Repeated vowel/consonant frequency";
 
     eh.initializeHandler(alphabet.getLength(), alphabet.getFirstElementAlphabet());
     unsigned int answer = 0;
@@ -31,8 +33,8 @@ int main(){
         std::cout << "--------------------------------------" << std::endl;
         std::cout << "Select an option: " << std::endl << std::endl;
         std::cout << "1. Choose cipher" << std::endl;
-        std::cout << "2. Run cipher" << std::endl;
-        std::cout << "3. Choose prediction model" << std::endl;
+        std::cout << "2. Choose prediction model" << std::endl;
+        std::cout << "3. Run cipher" << std::endl;
         std::cout << "4. Exit program" << std::endl;
         std::cout << std::endl << "Answer: ";
         std::cin >> answer;
@@ -57,6 +59,20 @@ int main(){
                 else if(cipher == Ciphers::vignere) cipherText = "Vignere Cipher";
             } break;
             case 2:{
+                std::cout << "--------------------------------------" << std::endl;
+                std::cout << "Choosing Model" << std::endl;
+                std::cout << "--------------------------------------" << std::endl;
+                std::cout << "Select an option: " << std::endl << std::endl;
+                std::cout << "1. Repeated vowel/consonant frequency" << std::endl;
+                std::cout << "2. Letter frequency" << std::endl;
+                std::cout << "3. Model 1 and 2 combined" << std::endl;
+                std::cout << std::endl << "Answer: ";
+                std::cin >> model;
+                if(model == 1) modelText = "Model 1: Repeated vowel/consonant frequency";
+                else if(model == 2) modelText = "Model 2: Letter frequency";
+                else if(model == 3) modelText = "Model 3: Repeated vowel/consonant frequency + Letter frequency";
+            } break;
+            case 3:{
                 std::cout << "--------------------------------------" << std::endl;
                 std::cout << "Running Cipher" << std::endl;
                 std::cout << "--------------------------------------" << std::endl;
@@ -136,7 +152,7 @@ int main(){
                                 std::cout << "Could not cipher Word!" << std::endl;
                                 return 1;
                             }
-                            if(!eh.scytaleDecipher()){
+                            if(!eh.scytaleDecipher(model)){
                                 std::cout << "Could not decipher Word!" << std::endl;
                                 return 1;
                             }
@@ -146,7 +162,7 @@ int main(){
                                 std::cout << "Could not cipher Word!" << std::endl;
                                 return 1;
                             }
-                            if(!eh.caesarDecipherImproved()){
+                            if(!eh.caesarDecipher(model)){
                                 std::cout << "Could not decipher Word!" << std::endl;
                                 return 1;
                             }
@@ -161,13 +177,13 @@ int main(){
                     std::cout << "Word Length: " << alphabet.getWordLength();
                     std::cout << "  Offset: "<< cipherOffset << std::endl;
 
-                    std::cout << "Original sentence" << std::endl;
+                    std::cout << "Original sentence: ";
                     alphabet.printWord();
                     std::cout << std::endl;
-                    std::cout << "Encrypted sentence" << std::endl;
+                    std::cout << "Encrypted sentence: ";
                     eh.printEncryptedWord();
                     std::cout << std::endl;
-                    std::cout << "Decrypted sentence" << std::endl;
+                    std::cout << "Decrypted sentence: ";
                     eh.printUnencryptedWord();
                     std::cout << std::endl;
                     std::cout << "Decipher results: ";
@@ -214,7 +230,7 @@ int main(){
                                     std::cout << "Could not cipher Word!" << std::endl;
                                     return 1;
                                 }
-                                if(!eh.scytaleDecipher()){
+                                if(!eh.scytaleDecipher(model)){
                                     std::cout << "Could not decipher Word!" << std::endl;
                                     return 1;
                                 }
@@ -225,7 +241,7 @@ int main(){
                                     std::cout << "Could not cipher Word!" << std::endl;
                                     return 1;
                                 }
-                                if(!eh.caesarDecipherImproved()){
+                                if(!eh.caesarDecipher(model)){
                                     std::cout << "Could not decipher Word!" << std::endl;
                                     return 1;
                             }
@@ -243,13 +259,13 @@ int main(){
                         std::cout << "Word Length: " << alphabet.getWordLength();
                         std::cout << "  Offset: "<< cipherOffset << std::endl;
 
-                        std::cout << "Original sentence" << std::endl;
+                        std::cout << "Original sentence: ";
                         alphabet.printWord();
                         std::cout << std::endl;
-                        std::cout << "Encrypted sentence" << std::endl;
+                        std::cout << "Encrypted sentence: ";
                         eh.printEncryptedWord();
                         std::cout << std::endl;
-                        std::cout << "Decrypted sentence" << std::endl;
+                        std::cout << "Decrypted sentence: ";
                         eh.printUnencryptedWord();
                         std::cout << std::endl;
                         std::cout << "Decipher results: ";
@@ -301,7 +317,7 @@ int main(){
                                     std::cout << "Could not cipher Word!" << std::endl;
                                     return 1;
                                 }
-                                if(!eh.scytaleDecipher()){
+                                if(!eh.scytaleDecipher(model)){
                                     std::cout << "Could not decipher Word!" << std::endl;
                                     return 1;
                                 }
@@ -312,7 +328,7 @@ int main(){
                                     std::cout << "Could not cipher Word!" << std::endl;
                                     return 1;
                                 }
-                                if(!eh.caesarDecipherImproved()){
+                                if(!eh.caesarDecipher(model)){
                                     std::cout << "Could not decipher Word!" << std::endl;
                                     return 1;
                             }
@@ -324,6 +340,9 @@ int main(){
                         }
                         bool veridict = eh.evaluateWord(word);
                         total ++;
+                        if(veridict == true){
+                            acurracyCounter++;
+                        }
                         if(printMode == 1){
                             std::cout << "Word Length: " << alphabet.getWordLength();
                             std::cout << "  Offset: "<< cipherOffset << std::endl;
@@ -333,40 +352,27 @@ int main(){
                             eh.printEncryptedWord();
                             std::cout << "Decrypted sentence: ";
                             eh.printUnencryptedWord();
-                        }
-                        if(veridict == true){
-                            acurracyCounter++;
-                            if(printMode == 1){
-                                std::cout << "SUCESS!" << std::endl << std::endl;
-                            }
-                        } else{
-                            if(printMode == 1){
-                                std::cout << "FAILURE!" << std::endl << std::endl;
+                            std::cout << "Decipher results: ";
+                            if(veridict == true){
+                                std::cout << "Success!" << std::endl << std::endl;
+                            } else{
+                                std::cout << "Failure!" << std::endl << std::endl;
                             }
                         }
                     }
                     unsigned int probabilityOfSuccess = ((float)acurracyCounter/(float)total)*100;
-
+                    std::cout << std::endl;
                     std::cout << "-------------------------------" << std::endl;
                     std::cout << cipherText <<  " Test Results" << std::endl;
                     std::cout << "-------------------------------" << std::endl;
-                    std::cout << "Total tests" << std::endl;
-                    std::cout << "-------------------------------" << std::endl;
-                    std::cout << "Total: " << total << std::endl << std::endl;;
-                    std::cout << "Total succesfull tests" << std::endl;
-                    std::cout << "-------------------------------" << std::endl;
-                    std::cout << "Completed: " << acurracyCounter << std::endl << std::endl;
-                    std::cout << "Average success" << std::endl;
-                    std::cout << "-------------------------------" << std::endl;
-                    std::cout << "Probability of success: " << probabilityOfSuccess << "%" << std::endl << std::endl;
+                    std::cout << "Total tests: " << total << std::endl << std::endl;
+                    std::cout << "Total succesfull tests: " << acurracyCounter << std::endl << std::endl;
+                    std::cout << "Success: " << probabilityOfSuccess << "%" << std::endl << std::endl;
                     char input;
                     std::cout << "Input a character to continue...";
                     std::cin >> input;
                 }
                 // test file results and naming of the file, ADD LATER
-            } break;
-            case 3:{
-                // Choose prediction model
             } break;
         }
     }
