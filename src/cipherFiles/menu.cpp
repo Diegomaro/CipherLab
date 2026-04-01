@@ -1,5 +1,4 @@
-#include <fstream>
-#include <sstream>
+
 #include <ctime>
 
 #include "menu.hpp"
@@ -13,13 +12,20 @@ bool Menu::menuInitialization(){
         std::cout << "Could not generate _alphabet!" << std::endl;
         return false;
     }
-    _cipher = Ciphers::caesar;
-    _model = 1;
-    _cipherText  = "Caesar Cipher";
-    _modelText = "Model 1. Repeated vowel/consonant frequency";
     _encryptionHandler.initializeHandler(_alphabet.getLength(), _alphabet.getFirstElementAlphabet());
+    _word = nullptr;
+    _cipher = Ciphers::caesar;
+    _cipherText  = "Caesar Cipher";
+    _model = 1;
+    _modelText = "Model 1. Repeated vowel/consonant frequency";
+
+    _cipherOffset = 0;
     _answer = 0;
+    _runMode = 0;
+    _printMode = 0;
     _veridict = false;
+    _total = 0;
+    _acurracyCounter = 0;
     return true;
 }
 
@@ -34,116 +40,40 @@ bool Menu::centralMenu(){
                 chooseModel();
             } break;
             case 3:{
-                std::cout << "--------------------------------------" << std::endl;
-                std::cout << "Running Cipher" << std::endl;
-                std::cout << "--------------------------------------" << std::endl;
-                std::cout << "Select an option: " << std::endl << std::endl;
-                std::cout << "1. Run one cipher" << std::endl;
-                std::cout << "2. Batch run of cipher" << std::endl;
-                std::cout << std::endl << "Answer: ";
-                unsigned int mode = 0;
-                std::cin >> mode;
-                if(mode == 1){
-                    std::cout << "--------------------------------------" << std::endl;
-                    std::cout << "Choosing sentence to process" << std::endl;
-                    std::cout << "--------------------------------------" << std::endl;
-                    std::cout << "Select an option: " << std::endl << std::endl;
-                    std::cout << "1. Set sentence by user" << std::endl;
-                    std::cout << "2. Generate a random word (work in progress)" << std::endl;
-                    std::cout << std::endl << "Answer: ";
-                    unsigned int subAnswer = 0;
-                    std::cin >> subAnswer;
-                    if(subAnswer == 1){
-                        std::string wordString;
-                        std::cout << "Input sentence to cipher and decipher: ";
-                        std::getline(std::cin >> std::ws, wordString);
-                        if(!_alphabet.setWord(wordString)){
-                            std::cout << "Could not set Word!" << std::endl;
-                            return false;
-                        }
-                    } else{
-                        unsigned int wordLength;
-                        std::cout << "Input word length desired: ";
-                        std::cin >> wordLength;
-                        if(!_alphabet.generateWord(wordLength)){
-                            std::cout << "Could not generate Word!" << std::endl;
-                            return false;
-                        }
-                    }
+                chooseRunMode();
+                if(_runMode == 1){
+                    chooseWord();
                     _word = _alphabet.getWord();
-                    //change depending on cipher, ADD LATER
-                    switch(_cipher){
-                        case Ciphers::atbash:{
-                            std::cout << "No offset required!" << std::endl;
-                        } break;
-                        case Ciphers::scytale:{
-                            std::cout << "Input cipher offset desired: ";
-                            std::cin >> _cipherOffset;
-                        } break;
-                        case Ciphers::caesar:{
-                            std::cout << "Input cipher offset desired: ";
-                            std::cin >> _cipherOffset;
-                        } break;
-                        default:{
-                            std::cout << "Invalid cipher set!" << std::endl;
-                            return false;
-                        }
-                    }
+                    chooseOffset();
                     cipherProcessing();
                     _veridict = _encryptionHandler.evaluateWord(_word);
                     printTestResults();
-                    char input;
-                    std::cout << "Input a character to continue...";
-                    std::cin >> input;
-                } else if(mode == 2){
-                    unsigned int printMode = 0;
-                    std::cout << "Insert '1' to print each test case, insert any other number to not print each test case: ";
-                    std::cin >> printMode;
-                    unsigned int acurracyCounter = 0;
-                    unsigned int total = 0;
-                    std::ifstream file;
-                    std::string line;
-                    file.open("../data/test_cases_substitution_cipher.csv");
-                    if(!file.is_open()){
-                        std::cout << "Could not open file!" << std::endl;
-                        return false;
-                    }
-                    while(std::getline(file, line)){
-                        if(!_alphabet.setWord(line)){
+                    continueToMenu();
+                } else if(_runMode == 2){
+                    _total = 0;
+                    _acurracyCounter = 0;
+                    loadFile();
+                    choosePrintMode();
+
+                    while(std::getline(_readFromFile, _lineFromReadFile)){
+                        if(!_alphabet.setWord(_lineFromReadFile)){
                             return false;
                         }
-                        _word = _alphabet.getWord();
-                        switch(_cipher){
-                            case Ciphers::atbash:{
-                            } break;
-                            case Ciphers::scytale:{
-                                _cipherOffset = (rand() % (((_alphabet.getWordLength() + 1) / 2) - 1)) + 2;
-                            } break;
-                            case Ciphers::caesar:{
-                                _cipherOffset = (rand() % 25) + 1;
-                            } break;
-                        }
+                        offsetGenerator();
                         cipherProcessing();
                         _veridict = _encryptionHandler.evaluateWord(_word);
-                        total ++;
+                        _total ++;
                         if(_veridict == true){
-                            acurracyCounter++;
+                            _acurracyCounter++;
                         }
-                        if(printMode == 1){
+                        if(_printMode == 1){
                             printTestResults();
                         }
                     }
-                    unsigned int probabilityOfSuccess = ((float)acurracyCounter/(float)total) * 100;
-                    std::cout << std::endl;
-                    std::cout << "-------------------------------" << std::endl;
-                    std::cout << _cipherText <<  " Test Results" << std::endl;
-                    std::cout << "-------------------------------" << std::endl;
-                    std::cout << "Total tests: " << total << std::endl << std::endl;
-                    std::cout << "Total succesfull tests: " << acurracyCounter << std::endl << std::endl;
-                    std::cout << "Success: " << probabilityOfSuccess << "%" << std::endl << std::endl;
-                    char input;
-                    std::cout << "Input a character to continue...";
-                    std::cin >> input;
+                    printLargeTestResults();
+                    continueToMenu();
+                    _lineFromReadFile = "";
+                    _readFromFile.close();
                 }
                 // test file results and naming of the file, ADD LATER
             } break;
@@ -203,6 +133,82 @@ bool Menu::chooseModel(){
     return true;
 }
 
+bool Menu::chooseRunMode(){
+    std::cout << "--------------------------------------" << std::endl;
+    std::cout << "Running Cipher" << std::endl;
+    std::cout << "--------------------------------------" << std::endl;
+    std::cout << "Select an option: " << std::endl << std::endl;
+    std::cout << "1. Run one cipher" << std::endl;
+    std::cout << "2. Batch run of cipher" << std::endl;
+    std::cout << std::endl << "Answer: ";
+    std::cin >> _runMode;
+    return true;
+}
+
+
+bool Menu::chooseWord(){
+    std::cout << "--------------------------------------" << std::endl;
+    std::cout << "Choosing sentence to process" << std::endl;
+    std::cout << "--------------------------------------" << std::endl;
+    std::cout << "Select an option: " << std::endl << std::endl;
+    std::cout << "1. Set sentence by user" << std::endl;
+    std::cout << "2. Generate a random word (work in progress)" << std::endl;
+    std::cout << std::endl << "Answer: ";
+    unsigned int subAnswer = 0;
+    std::cin >> subAnswer;
+    if(subAnswer == 1){
+        std::string wordString;
+        std::cout << "Input sentence to cipher and decipher: ";
+        std::getline(std::cin >> std::ws, wordString);
+        if(!_alphabet.setWord(wordString)){
+            std::cout << "Could not set Word!" << std::endl;
+            return false;
+        }
+    } else{
+        unsigned int wordLength;
+        std::cout << "Input word length desired: ";
+        std::cin >> wordLength;
+        if(!_alphabet.generateWord(wordLength)){
+            std::cout << "Could not generate Word!" << std::endl;
+            return false;
+        }
+    }
+    return true;
+}
+
+bool Menu::chooseOffset(){
+    std::cout << "--------------------------------------" << std::endl;
+    std::cout << "Choosing offset" << std::endl;
+    std::cout << "--------------------------------------" << std::endl;
+    switch(_cipher){
+        case Ciphers::atbash:{
+            std::cout << _cipherText << " does not require an offset!" << std::endl;
+        } break;
+        case Ciphers::scytale:{
+            _cipherOffset = 0;
+            while(_cipherOffset == 0 || _cipherOffset >= _alphabet.getWordLength()){
+                std::cout << "Choose an offset between 1 and " << _alphabet.getWordLength() - 1 << std::endl;
+                std::cout << "Input cipher offset desired: ";
+                std::cin >> _cipherOffset;
+            }
+        } break;
+        case Ciphers::caesar:{
+            _cipherOffset = 0;
+            while(_cipherOffset == 0 || _cipherOffset >= _alphabet.getLength()){
+                std::cout << "Choose an offset between 1 and 25" << std::endl;
+                std::cout << "Input cipher offset desired: ";
+                std::cin >> _cipherOffset;
+            }
+        } break;
+        default:{
+            std::cout << "Invalid cipher set!" << std::endl;
+            return false;
+        }
+    }
+    return true;
+}
+
+
 bool Menu::cipherProcessing(){
     if(!_encryptionHandler.setRawWord(_word, _alphabet.getWordLength())){
         std::cout << "Could not set word to cipher!" << std::endl;
@@ -248,6 +254,36 @@ bool Menu::cipherProcessing(){
     return true;
 }
 
+bool Menu::offsetGenerator(){
+    _word = _alphabet.getWord();
+    switch(_cipher){
+        case Ciphers::atbash:{
+        } break;
+        case Ciphers::scytale:{
+            _cipherOffset = (rand() % (((_alphabet.getWordLength() + 1) / 2) - 1)) + 2;
+        } break;
+        case Ciphers::caesar:{
+            _cipherOffset = (rand() % 25) + 1;
+        } break;
+    }
+    return true;
+}
+
+bool Menu::loadFile(){
+    _readFromFile.open("../data/test_cases_substitution_cipher.csv");
+    if(!_readFromFile.is_open()){
+        std::cout << "Could not open file!" << std::endl;
+        return false;
+    }
+    return true;
+}
+
+bool Menu::choosePrintMode(){
+    std::cout << "Insert '1' to print each test case, insert any other number to not print each test case: ";
+    std::cin >> _printMode;
+    return true;
+}
+
 bool Menu::printTestResults(){
     std::cout << "------------------------------" << std::endl;
     std::cout << _cipherText << " Test Results" << std::endl;
@@ -268,5 +304,23 @@ bool Menu::printTestResults(){
     } else{
         std::cout << "Failure!" << std::endl << std::endl;
     }
+    return true;
+}
+
+bool Menu::printLargeTestResults(){
+    unsigned int probabilityOfSuccess = ((float)_acurracyCounter/(float)_total) * 100;
+    std::cout << "-------------------------------" << std::endl;
+    std::cout << _cipherText <<  " Test Results" << std::endl;
+    std::cout << "-------------------------------" << std::endl;
+    std::cout << "Total tests: " << _total << std::endl << std::endl;
+    std::cout << "Total succesfull tests: " << _acurracyCounter << std::endl << std::endl;
+    std::cout << "Success: " << probabilityOfSuccess << "%" << std::endl << std::endl;
+    return true;
+}
+
+bool Menu::continueToMenu(){
+    char input;
+    std::cout << "Input a character to continue...";
+    std::cin >> input;
     return true;
 }
